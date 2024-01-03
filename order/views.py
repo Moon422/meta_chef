@@ -20,21 +20,23 @@ def manage_orders(request: HttpRequest):
             ctx['order_items'] = list(zip(order_items, prices))
             ctx['order'] = open_order
             ctx['total_cost'] = total_cost            
-        finally:
-            delivered_orders = models.Order.objects.filter(orderstatus=models.OrderStatus.DELIVERED)
-            reviewed_delivered_order_items = []
-            unreviewed_delivered_order_items = []
+        except:
+            pass
+        
+        delivered_orders = models.Order.objects.filter(orderstatus=models.OrderStatus.DELIVERED)
+        reviewed_delivered_order_items = []
+        unreviewed_delivered_order_items = []
 
-            for order in delivered_orders:
-                _order_items = models.OrderItem.objects.filter(order=order)
-                for item in _order_items:
-                    if item.review_submitted:
-                        reviewed_delivered_order_items.append(item)
-                    else:
-                        unreviewed_delivered_order_items.append(item)
-            
-            ctx['reviewed_delivered_order_items'] = reviewed_delivered_order_items
-            ctx['unreviewed_delivered_order_items'] = unreviewed_delivered_order_items            
+        for order in delivered_orders:
+            _order_items = models.OrderItem.objects.filter(order=order)
+            for item in _order_items:
+                if item.review_submitted:
+                    reviewed_delivered_order_items.append(item)
+                else:
+                    unreviewed_delivered_order_items.append(item)
+        
+        ctx['reviewed_delivered_order_items'] = reviewed_delivered_order_items
+        ctx['unreviewed_delivered_order_items'] = unreviewed_delivered_order_items            
             
         return render(request, "order/order.html", ctx)            
     else:
