@@ -23,7 +23,7 @@ def index(request: HttpRequest):
         elif hour_of_the_day == 'DINNER':
             hour_of_the_day_suggestion = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='dinner')]
         else:
-            food_ids = (fc.food.id for fc in FoodCategory.objects.filter(Q(category__title='snack') | Q(category__title='fast food')))
+            food_ids = (fc.food.id for fc in FoodCategory.objects.filter(Q(category__title='snack') | Q(category__title='fastfood')))
             hour_of_the_day_suggestion = Food.objects.filter(id__in=food_ids)
 
         hour_of_the_day_ratings = [Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'] for food in hour_of_the_day_suggestion]
