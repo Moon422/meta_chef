@@ -1,0 +1,100 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} | Faltu Kitchen</title>
+    <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.min.css' %}">
+    {% block style %}{% endblock %}
+</head>
+
+<body>
+    <nav class="bg-white shadow sticky-top" style="height: 4rem;">
+        <div class="container d-flex justify-content-between align-items-center" style="height: 100%;">
+            <a href="/" class="text-decoration-none">
+                <h3 class="m-0" style="color: #e21b70;">Faltu Kitchen</h3>
+            </a>
+
+            {% if request.user.is_authenticated %}
+            <div class="dropdown">
+                <button class="btn d-flex text-white justify-content-center align-items-center gap-2 dropdown-toggle"
+                    style="background: #e21b70;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-person-circle" viewBox="0 0 16 16">
+                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                        <path fill-rule="evenodd"
+                            d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                    </svg>
+                    {{request.user.first_name}}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/order">Orders</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+
+                    <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                    <li><a class="dropdown-item" href="/logout">Log out</a></li>
+                </ul>
+            </div>
+            {% else %}
+            <div class="d-flex gap-3">
+                <a href="/login" class="btn" style="border: 1px solid #e21b70; color: #e21b70;">Log in</a>
+                <a href="/signup" class="btn text-white" style="background: #e21b70;">Sign up</a>
+            </div>
+            {% endif %}
+        </div>
+    </nav>
+    <main id="content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div class="container">
+        <hr>
+        <div class="d-flex justify-content-between my-5">
+            <div>Faltu Kitchen</div>
+            <div class="d-flex justify-content-center align-items-center gap-3">
+                <div>facebook</div>
+                <div>twitter</div>
+            </div>
+        </div>
+        <hr>
+        <div class="row mb-5">
+            <div class="col-3">&copy; 2024 Faltu Kitchen</div>
+            <div class="col-3 d-flex flex-wrap column-gap-2">
+                <a href="#">Press</a>
+                <a href="#">Help Center</a>
+                <a href="#">Terms and conditions</a>
+                <a href="#">Privacy policy</a>
+                <a href="#">Refund Account Terms & Conditions</a>
+                <a href="#">Cashback Program</a>
+                <a href="#">Faltupro Subscription</a>
+            </div>
+            <div class="col-3 d-flex flex-wrap column-gap-2">
+                <a href="#">Dine-in</a>
+                <a href="#">Security</a>
+                <a href="#">Partner with us</a>
+                <a href="#">How foodpanda works</a>
+                <a href="#">Download foodpanda Apps</a>
+                <a href="#">Careers</a>
+                <a href="#">Corporate Customer</a>
+            </div>
+            <div class="col-3 d-flex flex-wrap column-gap-2">
+                <a href="#">faltugo for business</a>
+                <a href="#">faltugo for customers</a>
+                <a href="#">faltu Deals</a>
+                <a href="#">Grocery delivery</a>
+                <a href="#">Become and affiliate</a>
+                <a href="#">All cities</a>
+                <a href="#">Ramadan delivery</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'lib/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+
+</html>

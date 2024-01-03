@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Welcome to faltu kitchen{% endblock %}
+
+{% block content %}
+<div class="mb-5" style="background: #f7f7f7;">
+    <div class="d-flex justify-content-end align-items-center" style="height: 38rem;">
+        <div style="width: 44rem;">
+            <h1 class="mb-5">
+                It's the food and groceries you love, delivered
+            </h1>
+            <form class="d-flex align-items-center p-3 gap-3 bg-white rounded shadow">
+                <div class="flex-grow-1">
+                    <input type="text" class="form-control" style="height: 3rem;" placeholder="Location">
+                </div>
+                <button type="submit" class="btn text-white" style="background: #e21b70; height: 3rem;">Find
+                    food</button>
+            </form>
+        </div>
+        <div style="height: 100%;">
+            <img src="{% static 'img/refresh-hero-home-bd.webp' %}" alt="" height="100%">
+        </div>
+    </div>
+</div>
+<div class="container mb-5">
+    {% if hour_of_the_day == 'BREAKFAST' %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-3">Getting late for office or class? We got you covered...</h3>
+        <a href="#" class="btn text-white" style="background: #e21b70;">See more</a>
+    </div>
+    {% elif hour_of_the_day == 'LUNCH' %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-3">Forgot your lunchbox? Don't worry...</h3>
+        <a href="#" class="btn text-white" style="background: #e21b70;">See more</a>
+    </div>
+    {% elif hour_of_the_day == 'DINNER' %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-3">What a busy day...</h3>
+        <a href="#" class="btn text-white" style="background: #e21b70;">See more</a>
+    </div>
+    {% else %}
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-3">Need something for the boring hour?</h3>
+        <a href="#" class="btn text-white" style="background: #e21b70;">See more</a>
+    </div>
+    {% endif %}
+    <div class="row g-3">
+        {% for food, rating in hour_of_the_day_suggestion %}
+        <div class="col-3">
+            <a href="/food/{{food.id}}" class="text-decoration-none">
+                <div class="card">
+                    <img src="{% static 'img' %}/{{food.image_url}}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">{{food.title}}</h5>
+                            <p class="card-text"><span style="font-weight: bold;">{{rating}}</span> (5.0 ⭐)</p>
+                        </div>
+                        <p class="mb-0">Price: &#2547;{{food.price}}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="container mb-5">
+    <h3 class="mb-3">Try something new</h3>
+    <div class="row g-3">
+        {% for food, rating in newly_added %}
+        <div class="col-3">
+            <a href="/food/{{food.id}}" class="text-decoration-none">
+                <div class="card">
+                    <img src="{% static 'img' %}/{{food.image_url}}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">{{food.title}}</h5>
+                            <p class="card-text"><span style="font-weight: bold;">{{rating}}</span> (5.0 ⭐)</p>
+                        </div>
+                        <p class="mb-0">Price: &#2547;{{food.price}}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="container mb-5">
+    <h4 class="mb-3">Order food from the best restaurants and shops with Faltu Kitchen Bangladesh</h4>
+    <p>
+        Are you hungry? Did you have a long and stressful day? Interested in getting a cheesy pizza delivered to your
+        office or
+        looking to avoid the weekly shop? Then Faltu Kitchen is the right destination for you! Faltu Kitchen offers
+        you a
+        long and detailed list of the best restaurants and shops near you to help make your everyday easier. Our online
+        food
+        delivery service has it all, whether you fancy a juicy burger from Takeout, fresh sushi from Samdado or peri
+        peri
+        chicken from Nando's, Faltu Kitchen has over 2000 restaurants available from Dhaka to Chittagong through
+        to
+        Sylhet. Did you know you can order your groceries and more from Faltu Kitchen, too? Check out Faltu Kitchen
+        shops for
+        favourite
+        partners like Unimart, Suborno, Shwapno, Bengal Meat, and much more. Sit back and relax &hyphen; let Faltu
+        Kitchen
+        Bangladesh take
+        the pressure off your shoulders.
+    </p>
+</div>
+{% endblock %}

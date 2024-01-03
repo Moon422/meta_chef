@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Login to Faltu Kitchen{% endblock %}
+
+{% block content %}
+<div style="margin: 10rem auto; width: 30rem; border: 1px solid #e21b70;" class="rounded p-4">
+    {% if request.user.is_authenticated %}
+    <p>Already logged in as {{ user.first_name }} {{ user.last_name }}</p>
+    <a href="/signup" class="btn text-white w-100 d-flex justify-content-center align-items-center"
+        style="background: #e21b70; height: 3.5rem;">Sign out</a>
+    {% else %}
+    <h4>Welcome!</h4>
+    <p>Sign up or log in to continue</p>
+    <form class="mt-5" method="post" accept="/login">
+        {% csrf_token %}
+        <input type="text" name="redirect" value="{{ redirect }}" hidden>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingInput" name="username" placeholder="Username">
+            <label for="floatingInput">Username</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Password">
+            <label for="floatingPassword">Password</label>
+        </div>
+        <div class="p-2">
+            <a href="forget-password">Forgotten password</a>
+        </div>
+        <button type="submit" class="btn text-white w-100 mt-4 mb-3" style="background: #e21b70; height: 3.5rem;">Log
+            in</button>
+        <a href="/signup" class="btn w-100 d-flex justify-content-center align-items-center"
+            style="background: white; color: #e21b70; height: 3.5rem; border: 1px solid #e21b70;">Sign
+            up</a>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

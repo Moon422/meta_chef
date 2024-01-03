@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}Your orders{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+<div class="container border rounded p-4 my-5">
+    <h3>Order pending to be placed</h3>
+    {% if order %}
+    {% for item, price in order_items %}
+    <div class="d-flex flex-row border rounded gap-5 mb-2">
+        <div style="width: 12rem" class="p-2">
+            <img src="{% static 'img' %}/{{item.food.image_url}}" alt="thumbnail" width="100%" class="rounded-1">
+        </div>
+        <div class="flex-grow-1 py-2">
+            <h2>
+                {{item.food.title}}
+            </h2>
+            <p>
+                By: <a href="/kitchen/{{item.food.kitchen.id}}/">{{item.food.kitchen.name}}</a>
+            </p>
+        </div>
+        <form style="width: 16rem;" class="p-2 d-flex flex-column" method="post" action="/order/remove/{{item.id}}/">
+            {% csrf_token %}
+            <div class="input-group mb-2">
+                <div class="input-group-text w-50">Qauntity</div>
+                <input class="form-control" type="text" value="{{item.quantity}}" readonly>
+            </div>
+            <div class="input-group mb-2">
+                <div class="input-group-text w-50">Base Price</div>
+                <input class="form-control" type="text" value="&#2547; {{item.food.price}}" readonly>
+            </div>
+            <div class="input-group mb-2">
+                <div class="input-group-text w-50">Total Price</div>
+                <input class="form-control" type="text" value="&#2547; {{price}}" readonly>
+            </div>
+            <div class="flex-grow-1"></div>
+            <button class="btn btn-danger add-to-cart w-100">
+                Remove from Cart
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <p class="m-0">Total Price: &#2547; {{total_cost}}</p>
+        <div class="d-flex justify-content-end gap-2">
+            <a href="/order/cancel" class="btn btn-danger px-3 py-2">
+                Cancel Order
+            </a>
+            <a href="/order/place" class="btn btn-success px-4 py-2">
+                Place Order
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <p class="m-0">No order to place...</p>
+    {% endif %}
+</div>
+{% endblock %}
