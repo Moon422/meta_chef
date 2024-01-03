@@ -79,9 +79,13 @@ WSGI_APPLICATION = 'meta_chef.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'verceldb',
+        'USER': 'default',
+        'PASSWORD': 'WxOrPDq0Lwz2',
+        'HOST': 'ep-nameless-meadow-10488053-pooler.ap-southeast-1.postgres.vercel-storage.com',
+        'PORT': '5432',
+    },
 }
 
 
