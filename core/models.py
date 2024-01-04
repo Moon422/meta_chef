@@ -83,5 +83,8 @@ class OrderItem(models.Model):
 class FoodViewed(models.Model):
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     viewer = models.ForeignKey(User, on_delete=models.CASCADE)
+    view_date = models.DateTimeField(null=False)
+    view_count = models.IntegerField(null=False, default=1)
+
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)

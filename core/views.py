@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.db.models import Avg, Q
 from django.shortcuts import render, redirect
 
-from .models import Food, FoodCategory, Rating
+from .models import Food, FoodCategory, Rating, FoodViewed
 
 def rating_rounder(rating: float):
     return 5 if rating > 4.5 else 4.5 if rating > 4 else 4 if rating > 3.5 else 3.5 if rating > 3 else 3 if rating > 2.5 else 2.5 if rating > 2 else 2 if rating > 1.5 else 1.5 if rating > 1 else 1 if rating > 0.5 else 0.5 if rating > 0 else 0
@@ -165,21 +165,36 @@ def edit_password(request: HttpRequest):
         return HttpResponse(status=401)
 
 def food_view(request: HttpRequest, food_id: int):
-    try:
-        food = Food.objects.get(id=food_id)
-        rating = Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg']
-        rating = rating_rounder(rating)
+    if request.method == "GET":
+        try:
+            food = Food.objects.get(id=food_id)
+            rating = Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg']
+            rating = rating_rounder(rating)
 
-        kitchen_suggestions = Food.objects.filter(Q(kitchen=food.kitchen) & ~Q(id=food.id))
-        kitchen_suggestions = [(food, rating_rounder(Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'])) for food in kitchen_suggestions]        
-        kitchen_suggestions.sort(key=lambda f: f[1], reverse=True)
+            kitchen_suggestions = Food.objects.filter(Q(kitchen=food.kitchen) & ~Q(id=food.id))
+            kitchen_suggestions = [(food, rating_rounder(Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'])) for food in kitchen_suggestions]        
+            kitchen_suggestions.sort(key=lambda f: f[1], reverse=True)
 
-        ctx = {
-            'food': food,
-            'rating': rating,
-            'kitchen_suggestions': kitchen_suggestions,
-        }
-        return render(request, "core/food_details.html", ctx)
-    except Exception as e:
-        print(e)
-    return HttpResponse("fuck")
+            if request.user.is_authenticated:
+                user = request.user
+                recently_viewed = FoodViewed.objects.filter(Q(viewer=user) & ~Q(food=food)).order_by("-view_date")[:5]
+                print([rv.food.title for rv in recently_viewed])
+
+                try:
+                    fv = FoodViewed.objects.get(Q(viewer=user) & Q(food=food))
+                    fv.view_date = datetime.now()
+                    fv.view_count += 1
+                    fv.save()
+                except:
+                    FoodViewed.objects.create(food=food, viewer=user, view_date=datetime.now())
+
+            ctx = {
+                'food': food,
+                'rating': rating,
+                'kitchen_suggestions': kitchen_suggestions,
+            }
+            return render(request, "core/food_details.html", ctx)
+        except Exception as e:
+            return HttpResponse("Food does not exist", status=404)
+    else:
+        return HttpResponseBadRequest("Method not implemented")
