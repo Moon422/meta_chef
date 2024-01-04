@@ -7,32 +7,48 @@ from django.shortcuts import render, redirect
 
 from .models import Food, FoodCategory, Rating
 
+def rating_rounder(rating: float):
+    return 5 if rating > 4.5 else 4.5 if rating > 4 else 4 if rating > 3.5 else 3.5 if rating > 3 else 3 if rating > 2.5 else 2.5 if rating > 2 else 2 if rating > 1.5 else 1.5 if rating > 1 else 1 if rating > 0.5 else 0.5 if rating > 0 else 0
+
 # Create your views here.
 def index(request: HttpRequest):
     if request.method == "GET":
         newly_added = Food.objects.order_by("-date_created")[:5]
         ratings = [Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'] for food in newly_added]
-        ratings = [5 if rating > 4.5 else 4.5 if rating > 4 else 4 if rating > 3.5 else 3.5 if rating > 3 else 3 if rating > 2.5 else 2.5 if rating > 2 else 2 if rating > 1.5 else 1.5 if rating > 1 else 1 if rating > 0.5 else 0.5 if rating > 0 else 0 for rating in ratings]
+        ratings = [rating_rounder(rating) for rating in ratings]
         hour_of_the_day = datetime.now(tz=timezone(timedelta(hours=6))).hour
-        hour_of_the_day = 'BREAK_FAST' if 5 <= hour_of_the_day < 11 else 'LUNCH' if 12 <= hour_of_the_day < 3 else 'DINNER' if 19 <= hour_of_the_day <= 23 else 'SNACK'
+        print(hour_of_the_day)
+
+        hour_of_the_day = 'BREAK_FAST' if 5 <= hour_of_the_day < 11 else 'LUNCH' if 12 <= hour_of_the_day < 16 else 'DINNER' if 19 <= hour_of_the_day < 24 else 'SNACK'
+
+        # if 5 <= hour_of_the_day < 11:
+        #     hour_of_the_day = 'BREAK_FAST'
+        # elif 13 <= hour_of_the_day < 16:
+        #     hour_of_the_day = 'LUNCH'
+        # elif 19 <= hour_of_the_day < 24:
+        #     hour_of_the_day = 'DINNER'
+        # else:
+        #     hour_of_the_day = 'SNACK'
+
+        print(hour_of_the_day)
 
         if hour_of_the_day == 'BREAK_FAST':
-            hour_of_the_day_suggestion = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='breakfast')]
+            hour_of_the_day_suggestions = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='breakfast')]
         elif hour_of_the_day == 'LUNCH':
-            hour_of_the_day_suggestion = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='lunch')]
+            hour_of_the_day_suggestions = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='lunch')]
         elif hour_of_the_day == 'DINNER':
-            hour_of_the_day_suggestion = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='dinner')]
+            hour_of_the_day_suggestions = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='dinner')]
         else:
             food_ids = (fc.food.id for fc in FoodCategory.objects.filter(Q(category__title='snack') | Q(category__title='fastfood')))
-            hour_of_the_day_suggestion = Food.objects.filter(id__in=food_ids)
-
-        hour_of_the_day_ratings = [Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'] for food in hour_of_the_day_suggestion]
-        hour_of_the_day_ratings = [5 if rating > 4.5 else 4.5 if rating > 4 else 4 if rating > 3.5 else 3.5 if rating > 3 else 3 if rating > 2.5 else 2.5 if rating > 2 else 2 if rating > 1.5 else 1.5 if rating > 1 else 1 if rating > 0.5 else 0.5 if rating > 0 else 0 for rating in ratings]
+            hour_of_the_day_suggestions = list(Food.objects.filter(id__in=food_ids))
+        
+        hour_of_the_day_suggestions = [(food, rating_rounder(Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'])) for food in hour_of_the_day_suggestions]
+        hour_of_the_day_suggestions.sort(key=lambda f: f[1], reverse=True)
 
         ctx = {
             "newly_added": list(zip(newly_added, ratings)),
             "hour_of_the_day": hour_of_the_day,
-            "hour_of_the_day_suggestion": list(zip(hour_of_the_day_suggestion, hour_of_the_day_ratings))
+            "hour_of_the_day_suggestion": hour_of_the_day_suggestions
         }
 
         return render(request, "core/index.html", ctx)
@@ -152,6 +168,7 @@ def food_view(request: HttpRequest, food_id: int):
     try:
         food = Food.objects.get(id=food_id)
         rating = Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg']
+        rating = rating_rounder(rating)
         ctx = {
             'food': food,
             'rating': rating

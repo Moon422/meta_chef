@@ -61,4 +61,65 @@
     <p class="m-0">No order to place...</p>
     {% endif %}
 </div>
+<div class="container border rounded p-4 my-5">
+    <h3>Pending reviews</h3>
+    {% if unreviewed_delivered_order_items %}
+    {% for item in unreviewed_delivered_order_items %}
+    <div class="d-flex flex-row border rounded gap-5 mb-2">
+        <div style="width: 8rem" class="p-2">
+            <img src="{% static 'img' %}/{{item.food.image_url}}" alt="thumbnail" width="100%" class="rounded-1">
+        </div>
+        <div class="flex-grow-1 py-2">
+            <h4>
+                {{item.food.title}}
+            </h4>
+            <p>
+                By: <a href="/kitchen/{{item.food.kitchen.id}}/">{{item.food.kitchen.name}}</a>
+            </p>
+        </div>
+        <form style="width: 16rem;" class="p-2 d-flex flex-column" method="post" action="/order/review/{{item.id}}/">
+            {% csrf_token %}
+            <select class="form-select mb-2" aria-label="Default select example" name="rating">
+                <option selected>Select Rating</option>
+                <option value="1">1 Star</option>
+                <option value="2">2 Star</option>
+                <option value="3">3 Star</option>
+                <option value="4">4 Star</option>
+                <option value="5">5 Star</option>
+            </select>
+            <div class="flex-grow-1">
+
+            </div>
+            <button class="btn btn-primary add-to-cart w-100">
+                Submit Review
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="m-0">No items to review...</p>
+    {% endif %}
+</div>
+<div class="container border rounded p-4 my-5">
+    <h3>Previously ordered</h3>
+    {% if delivered_order_items %}
+    {% for item in delivered_order_items %}
+    <div class="d-flex flex-row border rounded gap-5 mb-2">
+        <div style="width: 6rem" class="p-2">
+            <img src="{% static 'img' %}/{{item.food.image_url}}" alt="thumbnail" width="100%" class="rounded-1">
+        </div>
+        <div class="flex-grow-1 py-2">
+            <h4>
+                {{item.food.title}}
+            </h4>
+            <p>
+                By: <a href="/kitchen/{{item.food.kitchen.id}}/">{{item.food.kitchen.name}}</a>
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="m-0">No previous orders...</p>
+    {% endif %}
+</div>
 {% endblock %}

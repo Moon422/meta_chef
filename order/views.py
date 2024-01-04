@@ -1,4 +1,4 @@
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from core import models
@@ -22,20 +22,20 @@ def manage_orders(request: HttpRequest):
             ctx['total_cost'] = total_cost            
         except:
             pass
-        
-        delivered_orders = models.Order.objects.filter(orderstatus=models.OrderStatus.DELIVERED)
-        reviewed_delivered_order_items = []
+
+        delivered_orders = models.Order.objects.filter(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.DELIVERED))
         unreviewed_delivered_order_items = []
+        delivered_order_items = []
 
         for order in delivered_orders:
             _order_items = models.OrderItem.objects.filter(order=order)
             for item in _order_items:
-                if item.review_submitted:
-                    reviewed_delivered_order_items.append(item)
-                else:
+                if not item.review_submitted:
                     unreviewed_delivered_order_items.append(item)
+                delivered_order_items.append(item)
+                    
         
-        ctx['reviewed_delivered_order_items'] = reviewed_delivered_order_items
+        ctx['delivered_order_items'] = delivered_order_items
         ctx['unreviewed_delivered_order_items'] = unreviewed_delivered_order_items            
             
         return render(request, "order/order.html", ctx)            
@@ -110,6 +110,30 @@ def cancel_order(request: HttpRequest):
                 return redirect(request.META.get("HTTP_REFERER"))
             except:
                 return HttpResponseBadRequest("no pending orders")
+        else:
+            return HttpResponseBadRequest("method not implemented")
+    else:
+        return HttpResponse("Please login to manage orders. <a href='/login'>Login</a>", status=401)
+
+def submit_review(request: HttpRequest, order_item_id: int):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            try:
+                order_item = models.OrderItem.objects.get(id=order_item_id)
+                if not order_item.review_submitted:
+                    if order_item.order.customer.id == request.user.id:
+                        rating = int(request.POST.get("rating"))
+                        models.Rating.objects.create(food=order_item.food, rating=rating)
+                        order_item.review_submitted = True
+                        order_item.save()
+
+                        return redirect(request.META["HTTP_REFERER"])
+                    else:
+                        return HttpResponseForbidden("Cannot review this order item")
+                else:
+                    return HttpResponseBadRequest("Review already submitted...")
+            except:
+                return HttpResponse("Order item not found...", status=404)
         else:
             return HttpResponseBadRequest("method not implemented")
     else:

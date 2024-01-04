@@ -6,14 +6,20 @@ User = get_user_model()
 # Create your models here.
 class Kitchen(models.Model):
     name = models.CharField(max_length=255, null=False)
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 class Category(models.Model):
     title = models.CharField(max_length=100, null=False)
     foods = models.ManyToManyField("Food", through="FoodCategory")
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.title
 
 class Food(models.Model):
     title = models.CharField(max_length=100, null=False)
@@ -23,14 +29,17 @@ class Food(models.Model):
     is_active = models.BooleanField(default=True)
     categories = models.ManyToManyField(Category, through="FoodCategory")
     kitchen = models.ForeignKey(Kitchen, on_delete=models.CASCADE)
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return self.title
 
 class FoodCategory(models.Model):
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
 
 class Ratings(models.IntegerChoices):
     ZERO = 0, 'zero'
@@ -43,8 +52,8 @@ class Ratings(models.IntegerChoices):
 class Rating(models.Model):
     rating = models.IntegerField(null=False, default=Ratings.FIVE, choices=Ratings.choices)
     food = models.ForeignKey(Food, null=False, on_delete=models.CASCADE)
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
 
 class OrderStatus(models.IntegerChoices):
     NOT_PLACED = 0
@@ -59,8 +68,8 @@ class Order(models.Model):
     delivery_charge = models.FloatField(default=0)
     orderstatus = models.IntegerField(
         choices=OrderStatus.choices, default=OrderStatus.NOT_PLACED)
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
 
 class OrderItem(models.Model):
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
@@ -68,5 +77,5 @@ class OrderItem(models.Model):
     discount = models.FloatField(default=0)
     review_submitted = models.BooleanField(default=False)
     order = models.ForeignKey(Order, null=False, on_delete=models.CASCADE)
-    date_created = models.DateField(auto_now_add=True)
-    date_updated = models.DateField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
