@@ -169,9 +169,15 @@ def food_view(request: HttpRequest, food_id: int):
         food = Food.objects.get(id=food_id)
         rating = Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg']
         rating = rating_rounder(rating)
+
+        kitchen_suggestions = Food.objects.filter(Q(kitchen=food.kitchen) & ~Q(id=food.id))
+        kitchen_suggestions = [(food, rating_rounder(Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'])) for food in kitchen_suggestions]        
+        kitchen_suggestions.sort(key=lambda f: f[1], reverse=True)
+
         ctx = {
             'food': food,
-            'rating': rating
+            'rating': rating,
+            'kitchen_suggestions': kitchen_suggestions,
         }
         return render(request, "core/food_details.html", ctx)
     except Exception as e:
