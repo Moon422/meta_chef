@@ -177,8 +177,9 @@ def food_view(request: HttpRequest, food_id: int):
 
             if request.user.is_authenticated:
                 user = request.user
-                recently_viewed = FoodViewed.objects.filter(Q(viewer=user) & ~Q(food=food)).order_by("-view_date")[:5]
-                print([rv.food.title for rv in recently_viewed])
+                recently_viewed = FoodViewed.objects.filter(Q(viewer=user) & ~Q(food=food)).order_by("-view_date")[:4]
+                recently_viewed = [rv.food for rv in recently_viewed]
+                recently_viewed = [(food, rating_rounder(Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'])) for food in recently_viewed]
 
                 try:
                     fv = FoodViewed.objects.get(Q(viewer=user) & Q(food=food))
@@ -192,6 +193,7 @@ def food_view(request: HttpRequest, food_id: int):
                 'food': food,
                 'rating': rating,
                 'kitchen_suggestions': kitchen_suggestions,
+                'recently_viewed': recently_viewed
             }
             return render(request, "core/food_details.html", ctx)
         except Exception as e:

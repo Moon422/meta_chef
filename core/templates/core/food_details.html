@@ -31,14 +31,14 @@
 {% block content %}
 
 <div class="container my-5">
-    <div class="row">
+    <div class="row mb-5">
         <div class="col-3">
             <img src="{% static 'img' %}/{{food.image_url}}" alt="" class="w-100 rounded-4">
         </div>
         <div class="col">
             <h3 class="mb-2">{{food.title}}</h3>
             <div class="d-flex justify-content-between align-items-center">
-                <p class="mb-2">Price: &#2547;{{food.price}}</p>
+                <p class="mb-2">By: <a href="/kitchen/{{food.kitchen.id}}">{{food.kitchen.name}}</a></p>
                 <p class="mb-2"><span style="font-weight: bold;">{{rating}}</span> (5.0 ⭐)</p>
             </div>
             <p class="mb-2">{{food.description}}</p>
@@ -46,6 +46,10 @@
         <div class="col-2">
             <form class="d-flex flex-column ms-auto" method="post" action="/order/add/{{food.id}}/">
                 {% csrf_token %}
+                <div class="input-group mb-2">
+                    <div class="input-group-text w-50">Price</div>
+                    <input class="form-control" type="text" value="&#2547; {{food.price}}" readonly>
+                </div>
                 <div class="d-flex justify-content-center mb-2">
                     <button class="btn btn-danger quanity-decrease me-2">
                         -
@@ -72,6 +76,55 @@
                     {% endif %}
                 </button>
             </form>
+        </div>
+    </div>
+    <hr>
+    <div class="my-5">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3>Foods you have recently viewed...</h3>
+            <a href="#" class="btn text-white" style="background: #e21b70;">See more</a>
+        </div>
+        <div class="row g-3">
+            {% for food, rating in recently_viewed %}
+            <div class="col-3">
+                <a href="/food/{{food.id}}" class="text-decoration-none">
+                    <div class="card">
+                        <img src="{% static 'img' %}/{{food.image_url}}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title">{{food.title}}</h5>
+                                <p class="card-text"><span style="font-weight: bold;">{{rating}}</span> (5.0 ⭐)</p>
+                            </div>
+                            <p class="mb-0">Price: &#2547;{{food.price}}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="my-5">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3>More from {{food.kitchen.name}}...</h3>
+            <a href="#" class="btn text-white" style="background: #e21b70;">See more</a>
+        </div>
+        <div class="row g-3">
+            {% for food, rating in kitchen_suggestions %}
+            <div class="col-3">
+                <a href="/food/{{food.id}}" class="text-decoration-none">
+                    <div class="card">
+                        <img src="{% static 'img' %}/{{food.image_url}}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title">{{food.title}}</h5>
+                                <p class="card-text"><span style="font-weight: bold;">{{rating}}</span> (5.0 ⭐)</p>
+                            </div>
+                            <p class="mb-0">Price: &#2547;{{food.price}}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
