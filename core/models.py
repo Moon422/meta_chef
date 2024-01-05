@@ -4,8 +4,40 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 # Create your models here.
+# class Address(models.Model):
+#     house_number = models.CharField(null=False)
+#     road_number = models.CharField(null=False)
+#     block_number = models.CharField(null=False)
+#     post_office = models.CharField(null=False)
+#     police_station = models.CharField(null=False)
+#     district = models.CharField(null=False)
+
+#     date_created = models.DateTimeField(auto_now_add=True)
+#     date_updated = models.DateTimeField(auto_now=True)
+
+class ProfileType(models.IntegerChoices):
+    ADMIN = (0, 'admin')
+    KITCHEN_OWNER = (1, 'kitchen_owner')
+    DELIVERY_PERSON = (2, 'delivery_person')
+    CUSTOMER = (3, 'customer')
+
+class Profile(models.Model):
+    phonenumber = models.CharField(max_length=14, null=False)
+    house_number = models.CharField(null=False)
+    road_number = models.CharField(null=False)
+    block_number = models.CharField(null=False)
+    post_office = models.CharField(null=False)
+    police_station = models.CharField(null=False)
+    district = models.CharField(null=False)
+    profile_type = models.IntegerField(
+        choices=ProfileType.choices, default=ProfileType.CUSTOMER)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
 class Kitchen(models.Model):
     name = models.CharField(max_length=255, null=False)
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -62,7 +94,7 @@ class OrderStatus(models.IntegerChoices):
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     phonenumber = models.CharField(max_length=14, null=False)
     discount = models.FloatField(default=0)
     delivery_charge = models.FloatField(default=0)
@@ -82,7 +114,7 @@ class OrderItem(models.Model):
 
 class FoodViewed(models.Model):
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
-    viewer = models.ForeignKey(User, on_delete=models.CASCADE)
+    viewer = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     view_date = models.DateTimeField(null=False)
     view_count = models.IntegerField(null=False, default=1)
 
