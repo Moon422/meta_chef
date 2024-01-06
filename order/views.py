@@ -6,9 +6,14 @@ from core import models
 # Create your views here.
 def manage_orders(request: HttpRequest):
     if request.user.is_authenticated:
-        ctx = {}
+        user = request.user
+        profile = models.Profile.objects.get(user=user)
+        ctx = {
+            'profile': profile
+        }
+
         try:
-            open_order = models.Order.objects.get(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
+            open_order = models.Order.objects.get(Q(customer=profile) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
             order_items = models.OrderItem.objects.filter(order=open_order)
             prices = [item.quantity * item.food.price for item in order_items]
 
@@ -23,7 +28,7 @@ def manage_orders(request: HttpRequest):
         except:
             pass
 
-        delivered_orders = models.Order.objects.filter(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.DELIVERED))
+        delivered_orders = models.Order.objects.filter(Q(customer=profile) & Q(orderstatus=models.OrderStatus.DELIVERED))
         unreviewed_delivered_order_items = []
         delivered_order_items = []
 
@@ -44,11 +49,14 @@ def manage_orders(request: HttpRequest):
 
 def add_to_order(request: HttpRequest, food_id: int):
     if request.user.is_authenticated:
+        user = request.user
+        profile = models.Profile.objects.get(user=user)
+
         if request.method == "POST":
             try:
-                open_order = models.Order.objects.get(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
+                open_order = models.Order.objects.get(Q(customer=profile) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
             except:
-                open_order = models.Order.objects.create(customer=request.user, phonenumber='01748689039', discount=0, delivery_charge=20)
+                open_order = models.Order.objects.create(customer=profile, phonenumber='01748689039', discount=0, delivery_charge=20)
             try:
                 food = models.Food.objects.get(id=food_id)
                 quantity = int(request.POST.get('quantity'))
@@ -73,9 +81,12 @@ def add_to_order(request: HttpRequest, food_id: int):
 
 def remove_from_order(request: HttpRequest, order_id: int):
     if request.user.is_authenticated:
+        user = request.user
+        profile = models.Profile.objects.get(user=user)
+
         if request.method == "POST":
             try:
-                open_order = models.Order.objects.get(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
+                open_order = models.Order.objects.get(Q(customer=profile) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
                 order_item = models.OrderItem.objects.get(Q(id=order_id) & Q(order=open_order))
                 order_item.delete()
                 return redirect(request.META.get("HTTP_REFERER"))
@@ -88,11 +99,15 @@ def remove_from_order(request: HttpRequest, order_id: int):
 
 def place_order(request: HttpRequest):
     if request.user.is_authenticated:
+        user = request.user
+        profile = models.Profile.objects.get(user=user)
+
         if request.method == "GET":
             try:
-                open_order = models.Order.objects.get(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
+                open_order = models.Order.objects.get(Q(customer=profile) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
                 open_order.orderstatus = models.OrderStatus.ORDER_PLACED
                 open_order.save()
+
                 return redirect(request.META.get("HTTP_REFERER"))
             except:
                 return HttpResponseBadRequest("no pending orders")
@@ -103,10 +118,14 @@ def place_order(request: HttpRequest):
     
 def cancel_order(request: HttpRequest):
     if request.user.is_authenticated:
+        user = request.user
+        profile = models.Profile.objects.get(user=user)
+
         if request.method == "GET":
             try:
-                open_order = models.Order.objects.get(Q(customer=request.user) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
+                open_order = models.Order.objects.get(Q(customer=profile) & Q(orderstatus=models.OrderStatus.NOT_PLACED))
                 open_order.delete()
+
                 return redirect(request.META.get("HTTP_REFERER"))
             except:
                 return HttpResponseBadRequest("no pending orders")
@@ -117,11 +136,14 @@ def cancel_order(request: HttpRequest):
 
 def submit_review(request: HttpRequest, order_item_id: int):
     if request.user.is_authenticated:
+        user = request.user
+        profile = models.Profile.objects.get(user=user)
+
         if request.method == "POST":
             try:
                 order_item = models.OrderItem.objects.get(id=order_item_id)
                 if not order_item.review_submitted:
-                    if order_item.order.customer.id == request.user.id:
+                    if order_item.order.customer.id == profile.id:
                         rating = int(request.POST.get("rating"))
                         models.Rating.objects.create(food=order_item.food, rating=rating)
                         order_item.review_submitted = True

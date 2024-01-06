@@ -18,7 +18,7 @@
                 <h3 class="m-0" style="color: #e21b70;">Faltu Kitchen</h3>
             </a>
 
-            {% if request.user.is_authenticated %}
+            {% if profile.user.is_authenticated %}
             <div class="dropdown">
                 <button class="btn d-flex text-white justify-content-center align-items-center gap-2 dropdown-toggle"
                     style="background: #e21b70;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -28,16 +28,21 @@
                         <path fill-rule="evenodd"
                             d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
                     </svg>
-                    {{request.user.first_name}}
+                    {{profile.user.first_name}}
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/order">Orders</a></li>
+                    <li><a class="dropdown-item" href="/order/">Orders</a></li>
+                    {% if profile.profile_type == 1 %}
+                    <li><a href="/kitchen/" class="dropdown-item">Kitchens</a></li>
+                    {% elif profile.profile_type == 2 %}
+                    <li><a href="/delivery/" class="dropdown-item">Deliveries</a></li>
+                    {% endif %}
                     <li>
                         <hr class="dropdown-divider">
                     </li>
 
-                    <li><a class="dropdown-item" href="/profile">Profile</a></li>
-                    <li><a class="dropdown-item" href="/logout">Log out</a></li>
+                    <li><a class="dropdown-item" href="/profile/">Profile</a></li>
+                    <li><a class="dropdown-item" href="/logout/">Log out</a></li>
                 </ul>
             </div>
             {% else %}
@@ -65,31 +70,31 @@
         <div class="row mb-5">
             <div class="col-3">&copy; 2024 Faltu Kitchen</div>
             <div class="col-3 d-flex flex-wrap column-gap-2">
-                <a href="#">Press</a>
-                <a href="#">Help Center</a>
-                <a href="#">Terms and conditions</a>
-                <a href="#">Privacy policy</a>
-                <a href="#">Refund Account Terms & Conditions</a>
-                <a href="#">Cashback Program</a>
-                <a href="#">Faltupro Subscription</a>
+                <a class="text-decoration-none" href="#">Press</a>
+                <a class="text-decoration-none" href="#">Help Center</a>
+                <a class="text-decoration-none" href="#">Terms and conditions</a>
+                <a class="text-decoration-none" href="#">Privacy policy</a>
+                <a class="text-decoration-none" href="#">Refund Account Terms & Conditions</a>
+                <a class="text-decoration-none" href="#">Cashback Program</a>
+                <a class="text-decoration-none" href="#">Faltupro Subscription</a>
             </div>
             <div class="col-3 d-flex flex-wrap column-gap-2">
-                <a href="#">Dine-in</a>
-                <a href="#">Security</a>
-                <a href="#">Partner with us</a>
-                <a href="#">How foodpanda works</a>
-                <a href="#">Download foodpanda Apps</a>
-                <a href="#">Careers</a>
-                <a href="#">Corporate Customer</a>
+                <a class="text-decoration-none" href="#">Dine-in</a>
+                <a class="text-decoration-none" href="#">Security</a>
+                <a class="text-decoration-none" href="#">Partner with us</a>
+                <a class="text-decoration-none" href="#">How foodpanda works</a>
+                <a class="text-decoration-none" href="#">Download foodpanda Apps</a>
+                <a class="text-decoration-none" href="#">Careers</a>
+                <a class="text-decoration-none" href="#">Corporate Customer</a>
             </div>
             <div class="col-3 d-flex flex-wrap column-gap-2">
-                <a href="#">faltugo for business</a>
-                <a href="#">faltugo for customers</a>
-                <a href="#">faltu Deals</a>
-                <a href="#">Grocery delivery</a>
-                <a href="#">Become and affiliate</a>
-                <a href="#">All cities</a>
-                <a href="#">Ramadan delivery</a>
+                <a class="text-decoration-none" href="#">faltugo for business</a>
+                <a class="text-decoration-none" href="#">faltugo for customers</a>
+                <a class="text-decoration-none" href="#">faltu Deals</a>
+                <a class="text-decoration-none" href="#">Grocery delivery</a>
+                <a class="text-decoration-none" href="#">Become and affiliate</a>
+                <a class="text-decoration-none" href="#">All cities</a>
+                <a class="text-decoration-none" href="#">Ramadan delivery</a>
             </div>
         </div>
     </div>

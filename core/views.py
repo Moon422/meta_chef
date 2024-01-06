@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.db.models import Avg, Q
 from django.shortcuts import render, redirect
 
-from .models import Food, FoodCategory, Rating, FoodViewed
+from .models import Food, FoodCategory, Profile, Rating, FoodViewed
 
 def rating_rounder(rating: float):
     return 5 if rating > 4.5 else 4.5 if rating > 4 else 4 if rating > 3.5 else 3.5 if rating > 3 else 3 if rating > 2.5 else 2.5 if rating > 2 else 2 if rating > 1.5 else 1.5 if rating > 1 else 1 if rating > 0.5 else 0.5 if rating > 0 else 0
@@ -16,21 +16,9 @@ def index(request: HttpRequest):
         newly_added = Food.objects.order_by("-date_created")[:5]
         ratings = [Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'] for food in newly_added]
         ratings = [rating_rounder(rating) for rating in ratings]
+        
         hour_of_the_day = datetime.now(tz=timezone(timedelta(hours=6))).hour
-        print(hour_of_the_day)
-
-        hour_of_the_day = 'BREAK_FAST' if 5 <= hour_of_the_day < 11 else 'LUNCH' if 12 <= hour_of_the_day < 16 else 'DINNER' if 19 <= hour_of_the_day < 24 else 'SNACK'
-
-        # if 5 <= hour_of_the_day < 11:
-        #     hour_of_the_day = 'BREAK_FAST'
-        # elif 13 <= hour_of_the_day < 16:
-        #     hour_of_the_day = 'LUNCH'
-        # elif 19 <= hour_of_the_day < 24:
-        #     hour_of_the_day = 'DINNER'
-        # else:
-        #     hour_of_the_day = 'SNACK'
-
-        print(hour_of_the_day)
+        hour_of_the_day = 'BREAK_FAST' if 5 <= hour_of_the_day < 11 else 'LUNCH' if 12 < hour_of_the_day < 16 else 'DINNER' if 19 <= hour_of_the_day < 24 else 'SNACK'
 
         if hour_of_the_day == 'BREAK_FAST':
             hour_of_the_day_suggestions = [fc.food for fc in FoodCategory.objects.select_related('food').select_related('category').filter(category__title='breakfast')]
@@ -50,6 +38,13 @@ def index(request: HttpRequest):
             "hour_of_the_day": hour_of_the_day,
             "hour_of_the_day_suggestion": hour_of_the_day_suggestions
         }
+
+        try:
+            user = request.user
+            profile = Profile.objects.get(user=user)
+            ctx['profile'] = profile
+        except:
+            pass
 
         return render(request, "core/index.html", ctx)
     else:
@@ -83,7 +78,10 @@ def app_logout(request: HttpRequest):
 def profile(request: HttpRequest):
     if request.user.is_authenticated:
         if request.method == "GET":
+            user = request.user
+            profile = Profile.objects.get(user=user)
             ctx = {
+                "profile": profile,
                 "edit_profile": False,
                 "edit_email": False,
                 "edit_password": False
@@ -97,7 +95,10 @@ def profile(request: HttpRequest):
 def edit_profile(request: HttpRequest):
     if request.user.is_authenticated:
         if request.method == "GET":
+            user = request.user
+            profile = Profile.objects.get(user=user)
             ctx = {
+                "profile": profile,
                 "edit_profile": True,
                 "edit_email": False,
                 "edit_password": False
@@ -107,7 +108,12 @@ def edit_profile(request: HttpRequest):
             first_name = request.POST.get("first_name")
             last_name = request.POST.get("last_name")
             phonenumber = request.POST.get("phonenumber")
-            get_user_model().objects.filter(id=request.user.id).update(first_name = first_name, last_name = last_name)
+            user = get_user_model().objects.filter(id=request.user.id)
+            user.update(first_name = first_name, last_name = last_name)
+            
+            profile = Profile.objects.get(user=user)
+            profile.phonenumber = phonenumber
+            profile.save()
 
             return redirect("core_profile")
         else:
@@ -117,8 +123,12 @@ def edit_profile(request: HttpRequest):
 
 def edit_email(request: HttpRequest):
     if request.user.is_authenticated:
+        user = request.user
+        profile = Profile.objects.get(user=user)
+
         if request.method == "GET":
             ctx = {
+                "profile": profile,
                 "edit_profile": False,
                 "edit_email": True,
                 "edit_password": False
@@ -136,8 +146,12 @@ def edit_email(request: HttpRequest):
 
 def edit_password(request: HttpRequest):
     if request.user.is_authenticated:
+        user = request.user
+        profile = Profile.objects.get(user=user)
+
         if request.method == "GET":
             ctx = {
+                "profile": profile,
                 "edit_profile": False,
                 "edit_email": False,
                 "edit_password": True
@@ -176,7 +190,7 @@ def food_view(request: HttpRequest, food_id: int):
             kitchen_suggestions.sort(key=lambda f: f[1], reverse=True)
 
             if request.user.is_authenticated:
-                user = request.user
+                user = Profile.objects.get(user=request.user)
                 recently_viewed = FoodViewed.objects.filter(Q(viewer=user) & ~Q(food=food)).order_by("-view_date")[:4]
                 recently_viewed = [rv.food for rv in recently_viewed]
                 recently_viewed = [(food, rating_rounder(Rating.objects.filter(food=food).aggregate(Avg("rating", default=0))['rating__avg'])) for food in recently_viewed]
@@ -190,6 +204,7 @@ def food_view(request: HttpRequest, food_id: int):
                     FoodViewed.objects.create(food=food, viewer=user, view_date=datetime.now())
 
             ctx = {
+                'profile': user,
                 'food': food,
                 'rating': rating,
                 'kitchen_suggestions': kitchen_suggestions,

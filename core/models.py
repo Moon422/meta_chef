@@ -35,6 +35,9 @@ class Profile(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self) -> str:
+        return f"{self.user.get_username()}"
+
 class Kitchen(models.Model):
     name = models.CharField(max_length=255, null=False)
     owner = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
